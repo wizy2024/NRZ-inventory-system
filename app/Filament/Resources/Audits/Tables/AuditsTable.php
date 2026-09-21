@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\Audits\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -18,9 +15,16 @@ class AuditsTable
                     ->label('Asset')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('asset.location.name')
-                    ->label('Recorded location')
+                TextColumn::make('expected_location')
+                    ->label('Expected location')
                     ->searchable(),
+                TextColumn::make('observed_location')
+                    ->label('Observed location')
+                    ->searchable(),
+                TextColumn::make('expected_assignee')
+                    ->label('Expected assignee')
+                    ->searchable()
+                    ->placeholder('Unassigned'),
                 TextColumn::make('result')
                     ->label('Result')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -45,13 +49,7 @@ class AuditsTable
             ->filters([
                 //
             ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->recordActions([])
+            ->toolbarActions([]);
     }
 }

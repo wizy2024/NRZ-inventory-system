@@ -15,12 +15,23 @@ class Audit extends Model
         'audited_by',
         'result',
         'checked_at',
+        'expected_location',
+        'observed_location',
+        'expected_assignee',
         'notes',
     ];
 
     protected $casts = [
         'checked_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Audit $audit): void {
+            $audit->audited_by ??= auth()->id();
+            $audit->checked_at ??= now();
+        });
+    }
 
     public function asset(): BelongsTo
     {

@@ -9,7 +9,6 @@ use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\URL;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AssetsTable
@@ -69,28 +68,30 @@ class AssetsTable
                     ->icon('heroicon-o-qr-code')
                     ->modalHeading(fn (Asset $record): string => "QR code: {$record->asset_tag}")
                     ->modalContent(function (Asset $record) {
-                        $baseUrl = rtrim((string) config('app.qr_base_url', config('app.url')), '/');
+                        $record->loadMissing(['department', 'location', 'assignedTo']);
 
-                        if (blank($baseUrl) || parse_url($baseUrl, PHP_URL_HOST) === null) {
-                            throw new \RuntimeException('QR_BASE_URL must be a complete URL reachable by the device scanning the QR code.');
-                        }
-
-                        URL::forceRootUrl($baseUrl);
-
-                        try {
-                            $url = URL::signedRoute('assets.info', ['asset' => $record]);
-                        } finally {
-                            URL::forceRootUrl(null);
-                        }
+                        $qrData = implode("\n", [
+                            'NRZ INVENTORY ASSET',
+                            "Asset tag: {$record->asset_tag}",
+                            "Serial number: {$record->serial_number}",
+                            "MAC address: " . ($record->mac_address ?: 'N/A'),
+                            "Type: {$record->type}",
+                            "Brand: {$record->brand}",
+                            "Department: " . ($record->department?->name ?: 'N/A'),
+                            "Location: " . ($record->location?->name ?: 'N/A'),
+                            "Assigned to: " . ($record->assignedTo?->name ?: 'Unassigned'),
+                            "Status: {$record->status}",
+                            "Purchase date: " . ($record->purchase_date?->format('Y-m-d') ?: 'N/A'),
+                            "Warranty expiry: " . ($record->warranty_expiry?->format('Y-m-d') ?: 'N/A'),
+                        ]);
 
                         return view('assets.qr-code', [
                             'asset' => $record,
-                            'url' => $url,
                             'qrCode' => QrCode::format('svg')
                                 ->size(240)
                                 ->margin(2)
                                 ->errorCorrection('H')
-                                ->generate($url),
+                                ->generate($qrData),
                         ]);
                     })
                     ->modalSubmitAction(false),

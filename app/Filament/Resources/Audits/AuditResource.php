@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Audits;
 
 use App\Filament\Resources\Audits\Pages\CreateAudit;
-use App\Filament\Resources\Audits\Pages\EditAudit;
 use App\Filament\Resources\Audits\Pages\ListAudits;
 use App\Filament\Resources\Audits\Schemas\AuditForm;
 use App\Filament\Resources\Audits\Tables\AuditsTable;
@@ -39,17 +38,17 @@ class AuditResource extends Resource
 
     public static function canEdit($record): bool
     {
-        return Gate::allows('manage audits');
+        return false;
     }
 
     public static function canDelete($record): bool
     {
-        return Gate::allows('manage audits');
+        return false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return Gate::allows('manage audits');
+        return false;
     }
 
     public static function form(Schema $schema): Schema
@@ -77,7 +76,6 @@ class AuditResource extends Resource
         return [
             'index' => ListAudits::route('/'),
             'create' => CreateAudit::route('/create'),
-            'edit' => EditAudit::route('/{record}/edit'),
         ];
     }
 }
