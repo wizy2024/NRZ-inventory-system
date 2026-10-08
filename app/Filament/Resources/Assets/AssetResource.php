@@ -44,12 +44,12 @@ class AssetResource extends Resource
 
     public static function canDelete($record): bool
     {
-        return Gate::allows('delete assets');
+        return false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return Gate::allows('delete assets');
+        return false;
     }
 
     public static function table(Table $table): Table

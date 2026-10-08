@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Asset extends Model
 {
@@ -61,6 +62,44 @@ class Asset extends Model
     public function audits(): HasMany
     {
         return $this->hasMany(Audit::class);
+    }
+
+    public function assignmentHistories(): HasMany
+    {
+        return $this->hasMany(AssetAssignmentHistory::class)->latest('effective_at');
+    }
+
+    protected static function booted(): void
+    {
+        static::created(function (Asset $asset): void {
+            $asset->recordAssignmentHistory('created');
+        });
+
+        static::updated(function (Asset $asset): void {
+            if ($asset->wasChanged([
+                'assigned_to_user_id',
+                'department_id',
+                'location_id',
+                'assigned_at',
+                'assignment_notes',
+            ])) {
+                $asset->recordAssignmentHistory('updated');
+            }
+        });
+    }
+
+    public function recordAssignmentHistory(string $action): void
+    {
+        $this->assignmentHistories()->create([
+            'assigned_to_user_id' => $this->assigned_to_user_id,
+            'department_id' => $this->department_id,
+            'location_id' => $this->location_id,
+            'changed_by' => Auth::id(),
+            'assigned_at' => $this->assigned_at,
+            'effective_at' => now(),
+            'action' => $action,
+            'assignment_notes' => $this->assignment_notes,
+        ]);
     }
 
 }

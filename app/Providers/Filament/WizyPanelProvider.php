@@ -31,6 +31,7 @@ class WizyPanelProvider extends PanelProvider
             ->brandName('NRZ Inventory')
             ->viteTheme('resources/css/filament/wizy/theme.css')
             ->login()
+            ->databaseNotifications()
             ->colors([
                 'primary' => Color::Amber,
             ])

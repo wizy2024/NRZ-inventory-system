@@ -64,7 +64,7 @@ class Reports extends Page
                             'inventory_summary' => [
                                 'Total assets' => Asset::count(),
                                 'Active assets' => Asset::where('status', 'active')->count(),
-                                'In maintenance' => Asset::where('status', 'maintenance')->count(),
+                                'Open maintenance logs' => MaintenanceLog::whereIn('status', ['pending', 'in_progress'])->count(),
                                 'Decommissioned' => Asset::where('status', 'decommissioned')->count(),
                                 'Departments represented' => Asset::distinct('department_id')->count('department_id'),
                             ],

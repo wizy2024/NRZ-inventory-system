@@ -53,6 +53,34 @@ class AuditForm
                     ->requiredIf('result', 'wrong_location')
                     ->nullable()
                     ->columnSpanFull(),
+                Select::make('follow_up_status')
+                    ->label('Follow-up status')
+                    ->options([
+                        'not_required' => 'Not required',
+                        'open' => 'Open',
+                        'in_progress' => 'In progress',
+                        'resolved' => 'Resolved',
+                    ])
+                    ->native(false)
+                    ->default('not_required')
+                    ->required(),
+                Select::make('follow_up_owner_id')
+                    ->label('Follow-up owner')
+                    ->relationship('followUpOwner', 'name')
+                    ->native(false)
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+                DateTimePicker::make('follow_up_due_at')
+                    ->label('Follow-up due')
+                    ->native(false)
+                    ->minDate(now())
+                    ->nullable(),
+                Textarea::make('follow_up_notes')
+                    ->label('Follow-up notes')
+                    ->rows(3)
+                    ->nullable()
+                    ->columnSpanFull(),
             ]);
     }
 }

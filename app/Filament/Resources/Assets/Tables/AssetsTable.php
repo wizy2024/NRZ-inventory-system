@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\Assets\Tables;
 
 use App\Models\Asset;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class AssetsTable
@@ -60,7 +61,22 @@ class AssetsTable
                 ? 'bg-primary-50 ring-2 ring-inset ring-primary-500 dark:bg-primary-400/10'
                 : null)
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'decommissioned' => 'Decommissioned',
+                    ]),
+                SelectFilter::make('type')
+                    ->options(fn (): array => Asset::query()->distinct()->orderBy('type')->pluck('type', 'type')->all()),
+                SelectFilter::make('department_id')
+                    ->relationship('department', 'name'),
+                SelectFilter::make('location_id')
+                    ->relationship('location', 'name'),
+                Filter::make('warranty_attention')
+                    ->label('Warranty expired or due within 30 days')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->whereNotNull('warranty_expiry')
+                        ->whereDate('warranty_expiry', '<=', now()->addDays(30))),
             ])
             ->recordActions([
                 Action::make('qr_code')
@@ -95,12 +111,20 @@ class AssetsTable
                         ]);
                     })
                     ->modalSubmitAction(false),
+                Action::make('assignment_history')
+                    ->label('Assignment history')
+                    ->icon('heroicon-o-clock')
+                    ->modalHeading(fn (Asset $record): string => "Assignment history: {$record->asset_tag}")
+                    ->modalContent(function (Asset $record) {
+                        $history = $record->assignmentHistories()
+                            ->with(['assignedTo', 'department', 'location', 'changedBy'])
+                            ->get();
+
+                        return view('assets.assignment-history', compact('history'));
+                    })
+                    ->modalSubmitAction(false),
                 EditAction::make(),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->toolbarActions([]);
     }
 }

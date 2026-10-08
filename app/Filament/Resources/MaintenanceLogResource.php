@@ -21,6 +21,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Action;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\MaintenanceLogResource\Pages\ListMaintenanceLogs;
@@ -82,6 +83,7 @@ class MaintenanceLogResource extends Resource
                     ->native(false)
                     ->searchable()
                     ->getSearchResultsUsing(fn (string $search): array => User::query()
+                        ->whereHas('roles', fn (Builder $query) => $query->where('name', 'Technician'))
                         ->where('name', 'like', "%{$search}%")
                         ->orderBy('name')
                         ->limit(50)
@@ -161,6 +163,18 @@ class MaintenanceLogResource extends Resource
             ])
             ->actions([
                 ViewAction::make(),
+                Action::make('assignment_history')
+                    ->label('Assignment history')
+                    ->icon('heroicon-o-clock')
+                    ->modalHeading(fn (MaintenanceLog $record): string => "Technician history: {$record->asset?->asset_tag}")
+                    ->modalContent(function (MaintenanceLog $record) {
+                        $history = $record->assignmentHistories()
+                            ->with(['technician', 'changedBy'])
+                            ->get();
+
+                        return view('maintenance.assignment-history', compact('history'));
+                    })
+                    ->modalSubmitAction(false),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
