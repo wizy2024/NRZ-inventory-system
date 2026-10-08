@@ -24,6 +24,7 @@ class Asset extends Model
         'department_id',
         'location_id',
         'assigned_to_user_id',
+        'assigned_to_name',
         'assigned_at',
         'assignment_notes',
         'status',
@@ -59,6 +60,11 @@ class Asset extends Model
         return $this->belongsTo(User::class, 'assigned_to_user_id');
     }
 
+    public function getAssigneeNameAttribute(): ?string
+    {
+        return $this->assigned_to_name ?: $this->assignedTo?->name;
+    }
+
     public function audits(): HasMany
     {
         return $this->hasMany(Audit::class);
@@ -71,6 +77,16 @@ class Asset extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (Asset $asset): void {
+            if ($asset->isDirty('assigned_to_name')) {
+                $asset->assigned_to_user_id = null;
+            } elseif ($asset->isDirty('assigned_to_user_id')) {
+                $asset->assigned_to_name = $asset->assigned_to_user_id
+                    ? User::query()->whereKey($asset->assigned_to_user_id)->value('name')
+                    : null;
+            }
+        });
+
         static::created(function (Asset $asset): void {
             $asset->recordAssignmentHistory('created');
         });
@@ -78,6 +94,7 @@ class Asset extends Model
         static::updated(function (Asset $asset): void {
             if ($asset->wasChanged([
                 'assigned_to_user_id',
+                'assigned_to_name',
                 'department_id',
                 'location_id',
                 'assigned_at',
@@ -92,6 +109,7 @@ class Asset extends Model
     {
         $this->assignmentHistories()->create([
             'assigned_to_user_id' => $this->assigned_to_user_id,
+            'assigned_to_name' => $this->assignee_name,
             'department_id' => $this->department_id,
             'location_id' => $this->location_id,
             'changed_by' => Auth::id(),

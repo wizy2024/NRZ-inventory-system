@@ -2,15 +2,12 @@
 
 namespace App\Filament\Resources\Assets\Schemas;
 
-use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class AssetForm
@@ -71,8 +68,6 @@ class AssetForm
                     ->native(false)
                     ->searchable()
                     ->preload()
-                    ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('assigned_to_user_id', null))
                     ->required(),
                 Select::make('location_id')
                     ->label('Location / station')
@@ -81,23 +76,10 @@ class AssetForm
                     ->searchable()
                     ->preload()
                     ->required(),
-                Select::make('assigned_to_user_id')
-                    ->label('Assigned to department user')
-                    ->options(function (Get $get): array {
-                        $departmentId = $get('department_id');
-
-                        if (blank($departmentId)) {
-                            return [];
-                        }
-
-                        return User::eligibleAssetAssignees($departmentId)
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all();
-                    })
-                    ->native(false)
-                    ->searchable()
-                    ->helperText('Choose the person who will use this machine. Technicians are not assignees.')
+                TextInput::make('assigned_to_name')
+                    ->label('Assigned to')
+                    ->placeholder('Enter the name of the person using this machine')
+                    ->maxLength(255)
                     ->nullable(),
                 DateTimePicker::make('assigned_at')
                     ->label('Assigned on')

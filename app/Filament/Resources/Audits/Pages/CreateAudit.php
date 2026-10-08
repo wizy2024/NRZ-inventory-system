@@ -21,7 +21,7 @@ class CreateAudit extends CreateRecord
         $data['audited_by'] = Auth::id();
         $data['checked_at'] = now();
         $data['expected_location'] = $asset->location?->name;
-        $data['expected_assignee'] = $asset->assignedTo?->name;
+        $data['expected_assignee'] = $asset->assignee_name;
         $data['follow_up_status'] = $data['follow_up_status']
             ?? ($data['result'] === 'found' ? 'not_required' : 'open');
 

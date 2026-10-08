@@ -13,6 +13,7 @@ class AssetAssignmentHistory extends Model
     protected $fillable = [
         'asset_id',
         'assigned_to_user_id',
+        'assigned_to_name',
         'department_id',
         'location_id',
         'changed_by',

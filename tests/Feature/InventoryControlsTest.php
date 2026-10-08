@@ -53,6 +53,90 @@ class InventoryControlsTest extends TestCase
         ]);
     }
 
+    public function test_asset_can_be_assigned_to_a_person_without_a_system_account(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $department = Department::create(['name' => 'IT']);
+        $location = Location::create(['name' => 'Harare', 'code' => 'HAR']);
+
+        $asset = Asset::create([
+            'asset_tag' => 'FREE-TEXT-001',
+            'serial_number' => 'FREE-TEXT-SERIAL-001',
+            'type' => 'Desktop',
+            'brand' => 'Test',
+            'department_id' => $department->id,
+            'location_id' => $location->id,
+            'assigned_to_name' => 'External Staff Member',
+            'status' => 'active',
+        ]);
+
+        $this->assertNull($asset->assigned_to_user_id);
+        $this->assertSame('External Staff Member', $asset->assignee_name);
+        $this->assertDatabaseHas('asset_assignment_histories', [
+            'asset_id' => $asset->id,
+            'assigned_to_user_id' => null,
+            'assigned_to_name' => 'External Staff Member',
+        ]);
+    }
+
+    public function test_changing_to_a_free_text_assignee_clears_a_legacy_user_assignment(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $assignee = User::factory()->create();
+        $department = Department::create(['name' => 'IT']);
+        $location = Location::create(['name' => 'Harare', 'code' => 'HAR']);
+
+        $asset = Asset::create([
+            'asset_tag' => 'LEGACY-ASSIGNEE-001',
+            'serial_number' => 'LEGACY-ASSIGNEE-SERIAL-001',
+            'type' => 'Desktop',
+            'brand' => 'Test',
+            'department_id' => $department->id,
+            'location_id' => $location->id,
+            'assigned_to_user_id' => $assignee->id,
+            'status' => 'active',
+        ]);
+
+        $asset->update(['assigned_to_name' => 'New Staff Member']);
+
+        $this->assertNull($asset->fresh()->assigned_to_user_id);
+        $this->assertSame('New Staff Member', $asset->fresh()->assignee_name);
+        $this->assertDatabaseHas('asset_assignment_histories', [
+            'asset_id' => $asset->id,
+            'assigned_to_user_id' => null,
+            'assigned_to_name' => 'New Staff Member',
+            'action' => 'updated',
+        ]);
+    }
+
+    public function test_changing_a_legacy_user_assignee_refreshes_the_assignee_name(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $firstAssignee = User::factory()->create(['name' => 'First Assignee']);
+        $secondAssignee = User::factory()->create(['name' => 'Second Assignee']);
+        $asset = Asset::create([
+            'asset_tag' => 'LINKED-ASSIGNEE-001',
+            'serial_number' => 'LINKED-ASSIGNEE-SERIAL-001',
+            'type' => 'Desktop',
+            'brand' => 'Test',
+            'department_id' => Department::create(['name' => 'IT'])->id,
+            'location_id' => Location::create(['name' => 'Harare', 'code' => 'HAR'])->id,
+            'assigned_to_user_id' => $firstAssignee->id,
+            'status' => 'active',
+        ]);
+
+        $asset->update(['assigned_to_user_id' => $secondAssignee->id]);
+
+        $this->assertSame('Second Assignee', $asset->fresh()->assignee_name);
+        $this->assertDatabaseHas('asset_assignment_histories', [
+            'asset_id' => $asset->id,
+            'assigned_to_user_id' => $secondAssignee->id,
+            'assigned_to_name' => 'Second Assignee',
+            'action' => 'updated',
+        ]);
+    }
+
     public function test_exception_audits_open_follow_up_by_default(): void
     {
         $user = User::factory()->create();

@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             $this->seedPermissionsAndRoles();
             $departments = $this->seedDepartments();
             $locations = $this->seedLocations();
-            $users = $this->seedUsers($departments);
+            $users = $this->seedUsers();
             $assets = $this->seedAssets($departments, $locations, $users);
             $maintenance = $this->seedMaintenance($assets, $users);
 
@@ -100,16 +100,16 @@ class DatabaseSeeder extends Seeder
         return $locations;
     }
 
-    private function seedUsers(array $departments): array
+    private function seedUsers(): array
     {
         $definitions = [
-            'Administrator' => ['name' => 'Test Administrator', 'email' => 'admin@example.com', 'role' => 'Administrator', 'department' => 'IT'],
-            'Legacy Administrator' => ['name' => 'Test User', 'email' => 'test@example.com', 'role' => 'Administrator', 'department' => 'IT'],
-            'Inventory Manager' => ['name' => 'Thandiwe Moyo', 'email' => 'thandiwe.moyo@example.com', 'role' => 'Inventory Manager', 'department' => 'IT'],
-            'Technician' => ['name' => 'Brian Ncube', 'email' => 'brian.ncube@example.com', 'role' => 'Technician', 'department' => 'IT'],
-            'Technician 2' => ['name' => 'Nomsa Dube', 'email' => 'nomsa.dube@example.com', 'role' => 'Technician', 'department' => 'IT'],
-            'Auditor' => ['name' => 'Rudo Chikwanha', 'email' => 'rudo.chikwanha@example.com', 'role' => 'Auditor', 'department' => 'Audit'],
-            'Read Only' => ['name' => 'Peter Ndlovu', 'email' => 'peter.ndlovu@example.com', 'role' => 'Read Only', 'department' => 'Finance'],
+            'Administrator' => ['name' => 'Test Administrator', 'email' => 'admin@example.com', 'role' => 'Administrator'],
+            'Legacy Administrator' => ['name' => 'Test User', 'email' => 'test@example.com', 'role' => 'Administrator'],
+            'Inventory Manager' => ['name' => 'Thandiwe Moyo', 'email' => 'thandiwe.moyo@example.com', 'role' => 'Inventory Manager'],
+            'Technician' => ['name' => 'Brian Ncube', 'email' => 'brian.ncube@example.com', 'role' => 'Technician'],
+            'Technician 2' => ['name' => 'Nomsa Dube', 'email' => 'nomsa.dube@example.com', 'role' => 'Technician'],
+            'Auditor' => ['name' => 'Rudo Chikwanha', 'email' => 'rudo.chikwanha@example.com', 'role' => 'Auditor'],
+            'Read Only' => ['name' => 'Peter Ndlovu', 'email' => 'peter.ndlovu@example.com', 'role' => 'Read Only'],
         ];
 
         $users = [];
@@ -119,7 +119,6 @@ class DatabaseSeeder extends Seeder
                 ['email' => $definition['email']],
                 [
                     'name' => $definition['name'],
-                    'department_id' => $departments[$definition['department']]->id,
                     'password' => Hash::make('password'),
                     'email_verified_at' => now(),
                 ],

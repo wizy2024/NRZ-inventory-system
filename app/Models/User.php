@@ -6,10 +6,8 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
@@ -25,7 +23,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'department_id',
         'password',
     ];
 
@@ -55,18 +52,6 @@ class User extends Authenticatable
     public function assignedAssets(): HasMany
     {
         return $this->hasMany(Asset::class, 'assigned_to_user_id');
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function scopeEligibleAssetAssignees(Builder $query, int|string $departmentId): Builder
-    {
-        return $query
-            ->where('department_id', $departmentId)
-            ->whereDoesntHave('roles', fn (Builder $query) => $query->where('name', 'Technician'));
     }
 
     public function audits(): HasMany

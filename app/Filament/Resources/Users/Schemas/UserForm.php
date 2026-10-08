@@ -21,12 +21,6 @@ class UserForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Select::make('department_id')
-                    ->label('Department')
-                    ->relationship('department', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->helperText('Set the department where this user works so machines can be assigned correctly.'),
                 TextInput::make('password')
                     ->label('Password')
                     ->password()

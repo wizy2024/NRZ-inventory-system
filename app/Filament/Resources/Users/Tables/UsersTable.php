@@ -21,10 +21,6 @@ class UsersTable
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('department.name')
-                    ->label('Department')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->badge()

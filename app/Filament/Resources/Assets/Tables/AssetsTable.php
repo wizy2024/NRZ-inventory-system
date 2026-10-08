@@ -38,9 +38,13 @@ class AssetsTable
                     ->searchable(),
                 TextColumn::make('location.name')
                     ->searchable(),
-                TextColumn::make('assignedTo.name')
+                TextColumn::make('assignee_name')
                     ->label('Assigned to')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->where(function (Builder $query) use ($search): void {
+                            $query->where('assigned_to_name', 'like', "%{$search}%")
+                                ->orWhereHas('assignedTo', fn (Builder $query) => $query->where('name', 'like', "%{$search}%"));
+                        }))
                     ->toggleable(),
                 TextColumn::make('status')
                     ->searchable(),
@@ -95,7 +99,7 @@ class AssetsTable
                             "Brand: {$record->brand}",
                             "Department: " . ($record->department?->name ?: 'N/A'),
                             "Location: " . ($record->location?->name ?: 'N/A'),
-                            "Assigned to: " . ($record->assignedTo?->name ?: 'Unassigned'),
+                            "Assigned to: " . ($record->assignee_name ?: 'Unassigned'),
                             "Status: {$record->status}",
                             "Purchase date: " . ($record->purchase_date?->format('Y-m-d') ?: 'N/A'),
                             "Warranty expiry: " . ($record->warranty_expiry?->format('Y-m-d') ?: 'N/A'),

@@ -6,7 +6,7 @@
                 <time class="text-xs text-gray-500">{{ $entry->effective_at?->format('d M Y, H:i') }}</time>
             </div>
             <dl class="mt-2 grid gap-2 text-sm sm:grid-cols-3">
-                <div><dt class="text-xs text-gray-500">Assigned to</dt><dd>{{ $entry->assignedTo?->name ?? 'Unassigned' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Assigned to</dt><dd>{{ $entry->assigned_to_name ?: ($entry->assignedTo?->name ?? 'Unassigned') }}</dd></div>
                 <div><dt class="text-xs text-gray-500">Department</dt><dd>{{ $entry->department?->name ?? 'Unassigned' }}</dd></div>
                 <div><dt class="text-xs text-gray-500">Location</dt><dd>{{ $entry->location?->name ?? 'Unassigned' }}</dd></div>
             </dl>
