@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('filament.wizy.auth.login');
 });
 
 Route::get('/device/{asset}/info', function (Asset $asset) {

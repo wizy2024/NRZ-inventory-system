@@ -87,6 +87,7 @@ class AuthorizationTest extends TestCase
         ]);
 
         config()->set('app.url', config('app.qr_base_url'));
+        URL::forceRootUrl(config('app.url'));
 
         $url = URL::signedRoute('assets.info', ['asset' => $asset]);
 

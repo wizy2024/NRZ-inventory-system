@@ -21,6 +21,17 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Access on the Same Network
+
+To let devices on the same Wi-Fi or local network access the app:
+
+1. Set `APP_URL` and `QR_BASE_URL` in `.env` to `http://<your-pc-lan-ip>:8001`.
+2. Build the frontend assets with `npm run build`.
+3. Start the app with `php artisan serve --host=0.0.0.0 --port=8001`.
+4. Open `http://<your-pc-lan-ip>:8001` on the other device.
+
+On Windows, allow PHP through Windows Defender Firewall on **Private networks** if prompted. Keep the firewall rule private; this setup is for your local network, not public internet access. The LAN IP can change when the router reconnects your PC, so update the two `.env` URLs if it changes.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
